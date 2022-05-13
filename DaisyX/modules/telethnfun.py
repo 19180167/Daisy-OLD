@@ -49,17 +49,18 @@ async def is_register_admin(chat, user):
 async def _(event):
     if event.fwd_from:
         return
-    if event.is_group:
-        if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-            await event.reply(
-                " Hai.. You are not admin..  You can't use this command.. But you can use in my pm"
-            )
-            return
+    if event.is_group and not (
+        await is_register_admin(event.input_chat, event.message.sender_id)
+    ):
+        await event.reply(
+            " Hai.. You are not admin..  You can't use this command.. But you can use in my pm"
+        )
+        return
     # SHOW_DESCRIPTION = False
     input_str = event.pattern_match.group(
         1
     )  # + " -inurl:(htm|html|php|pls|txt) intitle:index.of \"last modified\" (mkv|mp4|avi|epub|pdf|mp3)"
-    input_url = "https://bots.shrimadhavuk.me/search/?q={}".format(input_str)
+    input_url = f"https://bots.shrimadhavuk.me/search/?q={input_str}"
     headers = {"USER-AGENT": "UniBorg"}
     response = requests.get(input_url, headers=headers).json()
     output_str = " "
@@ -69,19 +70,18 @@ async def _(event):
         description = result.get("description")
         last = html2text.html2text(description)
         output_str += "[{}]({})\n{}\n".format(text, url, last)
-    await event.reply(
-        "{}".format(output_str), link_preview=False, parse_mode="Markdown"
-    )
+    await event.reply(f"{output_str}", link_preview=False, parse_mode="Markdown")
 
 
 @register(pattern="^/img (.*)")
 async def img_sampler(event):
     if event.fwd_from:
         return
-    if event.is_group:
-        if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-            await event.reply(".. You are not admin.. use in bot  pm")
-            return
+    if event.is_group and not (
+        await is_register_admin(event.input_chat, event.message.sender_id)
+    ):
+        await event.reply(".. You are not admin.. use in bot  pm")
+        return
     query = event.pattern_match.group(1)
     jit = f'"{query}"'
     downloader.download(
@@ -112,11 +112,10 @@ async def parseqr(qr_e):
         await qr_e.get_reply_message(), progress_callback=progress
     )
     url = "https://api.qrserver.com/v1/read-qr-code/?outputformat=json"
-    file = open(downloaded_file_name, "rb")
-    files = {"file": file}
-    resp = post(url, files=files).json()
-    qr_contents = resp[0]["symbol"][0]["data"]
-    file.close()
+    with open(downloaded_file_name, "rb") as file:
+        files = {"file": file}
+        resp = post(url, files=files).json()
+        qr_contents = resp[0]["symbol"][0]["data"]
     os.remove(downloaded_file_name)
     end = datetime.now()
     duration = (end - start).seconds
@@ -146,9 +145,7 @@ async def make_qr(qrcode):
             m_list = None
             with open(downloaded_file_name, "rb") as file:
                 m_list = file.readlines()
-            message = ""
-            for media in m_list:
-                message += media.decode("UTF-8") + "\r\n"
+            message = "".join(media.decode("UTF-8") + "\r\n" for media in m_list)
             os.remove(downloaded_file_name)
         else:
             message = previous_message.message
@@ -171,5 +168,5 @@ size=200x200&charset-source=UTF-8&charset-target=UTF-8\
     )
     os.remove(required_file_name)
     duration = (datetime.now() - start).seconds
-    await qrcode.reply("Created QRCode in {} seconds".format(duration))
+    await qrcode.reply(f"Created QRCode in {duration} seconds")
     await sleep(5)

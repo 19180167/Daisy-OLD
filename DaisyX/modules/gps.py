@@ -26,13 +26,14 @@ def gps(update, context, *args, **kwargs):
         lon = geoloc.longitude
         lat = geoloc.latitude
         the_loc = Location(lon, lat)
-        gm = "https://www.google.com/maps/search/{},{}".format(lat, lon)
+        gm = f"https://www.google.com/maps/search/{lat},{lon}"
         dispatcher.bot.send_location(chat_id, location=the_loc)
         update.message.reply_text(
-            "Open with: [Google Maps]({})".format(gm),
+            f"Open with: [Google Maps]({gm})",
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
         )
+
     except AttributeError:
         update.message.reply_text("I can't find that")
 
