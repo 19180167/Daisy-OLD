@@ -28,11 +28,10 @@ def addtag(update, context):
     try:
         member = chat.get_member(user_id)
     except BadRequest as excp:
-        if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user")
-            return
-        else:
+        if excp.message != "User not found":
             raise
+        message.reply_text("I can't seem to find this user")
+        return
     if user_id == context.bot.id:
         message.reply_text("how I supposed to tag myself")
         return
@@ -42,16 +41,13 @@ def addtag(update, context):
     match_user = mention_html(member.user.id, member.user.first_name)
     if match_user in tagall_list:
         message.reply_text(
-            "{} is already exist in {}'s tag list.".format(
-                mention_html(member.user.id, member.user.first_name), chat.title
-            ),
+            f"{mention_html(member.user.id, member.user.first_name)} is already exist in {chat.title}'s tag list.",
             parse_mode=ParseMode.HTML,
         )
+
         return
     message.reply_text(
-        "{} accept this, if you want to add yourself into {}'s tag list! or just simply decline this.".format(
-            mention_html(member.user.id, member.user.first_name), chat.title
-        ),
+        f"{mention_html(member.user.id, member.user.first_name)} accept this, if you want to add yourself into {chat.title}'s tag list! or just simply decline this.",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
@@ -59,7 +55,8 @@ def addtag(update, context):
                         text="Accept", callback_data=f"tagall_accept={user_id}"
                     ),
                     InlineKeyboardButton(
-                        text="Decline", callback_data=f"tagall_dicline={user_id}"
+                        text="Decline",
+                        callback_data=f"tagall_dicline={user_id}",
                     ),
                 ]
             ]
@@ -84,11 +81,10 @@ def removetag(update, context):
     try:
         member = chat.get_member(user_id)
     except BadRequest as excp:
-        if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user")
-            return
-        else:
+        if excp.message != "User not found":
             raise
+        message.reply_text("I can't seem to find this user")
+        return
     if user_id == context.bot.id:
         message.reply_text("how I supposed to tag or untag myself")
         return
@@ -97,11 +93,10 @@ def removetag(update, context):
     match_user = mention_html(member.user.id, member.user.first_name)
     if match_user not in tagall_list:
         message.reply_text(
-            "{} is doesn't exist in {}'s list!".format(
-                mention_html(member.user.id, member.user.first_name), chat.title
-            ),
+            f"{mention_html(member.user.id, member.user.first_name)} is doesn't exist in {chat.title}'s list!",
             parse_mode=ParseMode.HTML,
         )
+
         return
     member = chat.get_member(int(user_id))
     chat_id = str(chat.id)[1:]
@@ -109,9 +104,7 @@ def removetag(update, context):
         f"tagall2_{chat_id}", mention_html(member.user.id, member.user.first_name)
     )
     message.reply_text(
-        "{} is successfully removed from {}'s list.".format(
-            mention_html(member.user.id, member.user.first_name), chat.title
-        ),
+        f"{mention_html(member.user.id, member.user.first_name)} is successfully removed from {chat.title}'s list.",
         parse_mode=ParseMode.HTML,
     )
 
@@ -123,38 +116,33 @@ def tagg_all_button(update, context):
     splitter = query.data.split("=")
     query_match = splitter[0]
     user_id = splitter[1]
-    if query_match == "tagall_accept":
-        if query.from_user.id == int(user_id):
-            member = chat.get_member(int(user_id))
-            chat_id = str(chat.id)[1:]
-            REDIS.sadd(
-                f"tagall2_{chat_id}",
-                mention_html(member.user.id, member.user.first_name),
-            )
-            query.message.edit_text(
-                "{} is accepted! to add yourself {}'s tag list.".format(
-                    mention_html(member.user.id, member.user.first_name), chat.title
-                ),
-                parse_mode=ParseMode.HTML,
-            )
+    if query_match == "tagall_accept" and query.from_user.id == int(user_id):
+        member = chat.get_member(int(user_id))
+        chat_id = str(chat.id)[1:]
+        REDIS.sadd(
+            f"tagall2_{chat_id}",
+            mention_html(member.user.id, member.user.first_name),
+        )
+        query.message.edit_text(
+            f"{mention_html(member.user.id, member.user.first_name)} is accepted! to add yourself {chat.title}'s tag list.",
+            parse_mode=ParseMode.HTML,
+        )
 
-        else:
-            context.bot.answer_callback_query(
-                query.id, text="You're not the user being added in tag list!"
-            )
+
+    elif (
+        query_match == "tagall_accept"
+        or query_match == "tagall_dicline"
+        and query.from_user.id != int(user_id)
+    ):
+        context.bot.answer_callback_query(
+            query.id, text="You're not the user being added in tag list!"
+        )
     elif query_match == "tagall_dicline":
-        if query.from_user.id == int(user_id):
-            member = chat.get_member(int(user_id))
-            query.message.edit_text(
-                "{} is deslined! to add yourself {}'s tag list.".format(
-                    mention_html(member.user.id, member.user.first_name), chat.title
-                ),
-                parse_mode=ParseMode.HTML,
-            )
-        else:
-            context.bot.answer_callback_query(
-                query.id, text="You're not the user being added in tag list!"
-            )
+        member = chat.get_member(int(user_id))
+        query.message.edit_text(
+            f"{mention_html(member.user.id, member.user.first_name)} is deslined! to add yourself {chat.title}'s tag list.",
+            parse_mode=ParseMode.HTML,
+        )
 
 
 @run_async
@@ -167,15 +155,11 @@ def untagme(update, context):
     tagall_list = list(REDIS.sunion(f"tagall2_{chat_id}"))
     match_user = mention_html(user.id, user.first_name)
     if match_user not in tagall_list:
-        message.reply_text(
-            "You're already doesn't exist in {}'s tag list!".format(chat.title)
-        )
+        message.reply_text(f"You're already doesn't exist in {chat.title}'s tag list!")
         return
     REDIS.srem(f"tagall2_{chat_id}", mention_html(user.id, user.first_name))
     message.reply_text(
-        "{} has been removed from {}'s tag list.".format(
-            mention_html(user.id, user.first_name), chat.title
-        ),
+        f"{mention_html(user.id, user.first_name)} has been removed from {chat.title}'s tag list.",
         parse_mode=ParseMode.HTML,
     )
 
@@ -190,13 +174,11 @@ def tagme(update, context):
     tagall_list = list(REDIS.sunion(f"tagall2_{chat_id}"))
     match_user = mention_html(user.id, user.first_name)
     if match_user in tagall_list:
-        message.reply_text("You're Already Exist In {}'s Tag List!".format(chat.title))
+        message.reply_text(f"You're Already Exist In {chat.title}'s Tag List!")
         return
     REDIS.sadd(f"tagall2_{chat_id}", mention_html(user.id, user.first_name))
     message.reply_text(
-        "{} has been successfully added in {}'s tag list.".format(
-            mention_html(user.id, user.first_name), chat.title
-        ),
+        f"{mention_html(user.id, user.first_name)} has been successfully added in {chat.title}'s tag list.",
         parse_mode=ParseMode.HTML,
     )
 
@@ -215,11 +197,8 @@ def tagall(update, context):
         message.reply_text("Please give a reason why are you want to tag all!")
         return
     chat_id = str(chat.id)[1:]
-    tagall = list(REDIS.sunion(f"tagall2_{chat_id}"))
-    tagall.sort()
-    tagall = ", ".join(tagall)
-
-    if tagall:
+    tagall = sorted(REDIS.sunion(f"tagall2_{chat_id}"))
+    if tagall := ", ".join(tagall):
         tagall_reason = query
         if message.reply_to_message:
             message.reply_to_message.reply_text(
@@ -252,7 +231,7 @@ def untagall(update, context):
     for tag_user in tagall_list:
         REDIS.srem(f"tagall2_{chat_id}", tag_user)
     message.reply_text(
-        "Successully removed all users from {}'s tag list.".format(chat.title)
+        f"Successully removed all users from {chat.title}'s tag list."
     )
 
 

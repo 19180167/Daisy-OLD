@@ -11,13 +11,11 @@ from DaisyX.utils.ut import get_arg
 
 def yt_search(song):
     videosSearch = VideosSearch(song, limit=1)
-    result = videosSearch.result()
-    if not result:
-        return False
-    else:
+    if result := videosSearch.result():
         video_id = result["result"][0]["id"]
-        url = f"https://youtu.be/{video_id}"
-        return url
+        return f"https://youtu.be/{video_id}"
+    else:
+        return False
 
 
 class AioHttp:
@@ -44,7 +42,7 @@ class AioHttp:
 async def song(client, message):
     message.chat.id
     user_id = message.from_user["id"]
-    args = get_arg(message) + " " + "song"
+    args = f"{get_arg(message)} song"
     if args.startswith(" "):
         await message.reply("Enter a song name. Check /help")
         return ""

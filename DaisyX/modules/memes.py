@@ -19,7 +19,7 @@ def kimtext(update, context):
     if message.reply_to_message:
         data = message.reply_to_message.text
     else:
-        data = str("Haha yes, I know how to kim text.")
+        data = "Haha yes, I know how to kim text."
 
     if not Path("kim.jpg").is_file():
         buffer = Image.open(
@@ -35,15 +35,14 @@ def kimtext(update, context):
     reply_text = spongemock.mock(data)
 
     randint = random.randint(1, 699)
-    magick = """convert kim.jpg -font Impact -pointsize 50 -size 480x360 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{}" -flatten kimed{}.jpg""".format(
-        reply_text, randint
-    )
+    magick = f"""convert kim.jpg -font Impact -pointsize 50 -size 480x360 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{reply_text}" -flatten kimed{randint}.jpg"""
+
     os.system(magick)
-    with open("kimed{}.jpg".format(randint), "rb") as mockedphoto:
+    with open(f"kimed{randint}.jpg", "rb") as mockedphoto:
         message.reply_to_message.reply_photo(
             photo=mockedphoto, reply=message.reply_to_message
         )
-    os.remove("kimed{}.jpg".format(randint))
+    os.remove(f"kimed{randint}.jpg")
 
 
 @run_async
@@ -52,7 +51,7 @@ def hitlertext(update, context):
     if message.reply_to_message:
         data = message.reply_to_message.text
     else:
-        data = str("Haha yes, I know how to mock text.")
+        data = "Haha yes, I know how to mock text."
 
     if not Path("hitler.jpg").is_file():
         buffer = Image.open(
@@ -68,15 +67,14 @@ def hitlertext(update, context):
     reply_text = spongemock.mock(data)
 
     randint = random.randint(1, 699)
-    magick = """convert hitler.jpg -font Impact -pointsize 50 -size 615x409 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{}" -flatten hitlered{}.jpg""".format(
-        reply_text, randint
-    )
+    magick = f"""convert hitler.jpg -font Impact -pointsize 50 -size 615x409 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{reply_text}" -flatten hitlered{randint}.jpg"""
+
     os.system(magick)
-    with open("hitlered{}.jpg".format(randint), "rb") as mockedphoto:
+    with open(f"hitlered{randint}.jpg", "rb") as mockedphoto:
         message.reply_to_message.reply_photo(
             photo=mockedphoto, reply=message.reply_to_message
         )
-    os.remove("hitlered{}.jpg".format(randint))
+    os.remove(f"hitlered{randint}.jpg")
 
 
 @run_async
@@ -85,7 +83,7 @@ def spongemocktext(update, context):
     if message.reply_to_message:
         data = message.reply_to_message.text
     else:
-        data = str("Haha yes, I know how to mock text.")
+        data = "Haha yes, I know how to mock text."
 
     if not Path("bob.jpg").is_file():
         buffer = Image.open(
@@ -101,15 +99,14 @@ def spongemocktext(update, context):
     reply_text = spongemock.mock(data)
 
     randint = random.randint(1, 699)
-    magick = """convert bob.jpg -font Impact -pointsize 30 -size 512x300 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{}" -flatten mocked{}.jpg""".format(
-        reply_text, randint
-    )
+    magick = f"""convert bob.jpg -font Impact -pointsize 30 -size 512x300 -stroke black -strokewidth 1 -fill white -background none -gravity north caption:"{reply_text}" -flatten mocked{randint}.jpg"""
+
     os.system(magick)
-    with open("mocked{}.jpg".format(randint), "rb") as mockedphoto:
+    with open(f"mocked{randint}.jpg", "rb") as mockedphoto:
         message.reply_to_message.reply_photo(
             photo=mockedphoto, reply=message.reply_to_message
         )
-    os.remove("mocked{}.jpg".format(randint))
+    os.remove(f"mocked{randint}.jpg")
 
 
 MOCK_HANDLER = DisableAbleCommandHandler("mock", spongemocktext, admin_ok=True)

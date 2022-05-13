@@ -15,10 +15,11 @@ from DaisyX.modules.thonkify_dict import thonkifydict
 @run_async
 def plet(update: Update, context: CallbackContext):
     message = update.effective_message
-    if not message.reply_to_message:
-        msg = message.text.split(None, 1)[1]
-    else:
-        msg = message.reply_to_message.text
+    msg = (
+        message.reply_to_message.text
+        if message.reply_to_message
+        else message.text.split(None, 1)[1]
+    )
 
     # the processed photo becomes too long and unreadable + the telegram doesn't support any longer dimensions + you have the lulz.
     if (len(msg)) > 39:

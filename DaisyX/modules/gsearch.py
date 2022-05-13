@@ -34,17 +34,18 @@ async def is_register_admin(chat, user):
 async def _(event):
     if event.fwd_from:
         return
-    if event.is_group:
-        if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-            await event.reply(
-                " Hai.. You are not admin..  You can't use this command.. But you can use in my pm"
-            )
-            return
+    if event.is_group and not (
+        await is_register_admin(event.input_chat, event.message.sender_id)
+    ):
+        await event.reply(
+            " Hai.. You are not admin..  You can't use this command.. But you can use in my pm"
+        )
+        return
     # SHOW_DESCRIPTION = False
     input_str = event.pattern_match.group(
         1
     )  # + " -inurl:(htm|html|php|pls|txt) intitle:index.of \"last modified\" (mkv|mp4|avi|epub|pdf|mp3)"
-    input_url = "https://bots.shrimadhavuk.me/search/?q={}".format(input_str)
+    input_url = f"https://bots.shrimadhavuk.me/search/?q={input_str}"
     headers = {"USER-AGENT": "UniBorg"}
     response = requests.get(input_url, headers=headers).json()
     output_str = " "
@@ -54,6 +55,4 @@ async def _(event):
         description = result.get("description")
         last = html2text.html2text(description)
         output_str += "[{}]({})\n{}\n".format(text, url, last)
-    await event.reply(
-        "{}".format(output_str), link_preview=False, parse_mode="Markdown"
-    )
+    await event.reply(f"{output_str}", link_preview=False, parse_mode="Markdown")
